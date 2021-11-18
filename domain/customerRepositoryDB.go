@@ -1,38 +1,46 @@
 package domain
 
 import (
+	"banking-app/dto"
 	"banking-app/errs"
+	"banking-app/logger"
 	"database/sql"
-	"log"
+	"fmt"
+	"os"
 	"time"
+
+	"github.com/jmoiron/sqlx"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type CustormerRepositoryDb struct {
-	client *sql.DB
+	client *sqlx.DB
 }
 
-func (d CustormerRepositoryDb) ById(id string) (*Customer, *errs.AppError) {
+func (d CustormerRepositoryDb) ById(id string) (*dto.CustomerResponse, *errs.AppError) {
 	customerSql := "select customer_id, name , city, zipcode, date_of_birth, status from customers where customer_id= ?"
 
-	row := d.client.QueryRow(customerSql, id)
-
 	var c Customer
-	err := row.Scan(&c.Id, &c.Name, &c.City, &c.Zipcode, &c.DateOfBirth, &c.Status)
+
+	err := d.client.Get(&c, customerSql, id)
+
 	if err != nil {
 		if err == sql.ErrNoRows {
+			logger.Info("customer not found")
 			return nil, errs.NewNotFoundError("customer not found")
 		} else {
-			log.Println("Error while scanning customers table" + err.Error())
+			logger.Error("Error while scanning customers table" + err.Error())
 			return nil, errs.NewUnexpectedError()
 		}
 	}
 
-	return &c, nil
+	response := c.ToDto()
+
+	return &response, nil
 }
 
-func (d CustormerRepositoryDb) FindAll(status string) ([]Customer, *errs.AppError) {
+func (d CustormerRepositoryDb) FindAll(status string) ([]dto.CustomerResponse, *errs.AppError) {
 
 	findAllSql := "select customer_id, name , city, zipcode, date_of_birth, status from customers"
 
@@ -44,28 +52,28 @@ func (d CustormerRepositoryDb) FindAll(status string) ([]Customer, *errs.AppErro
 		}
 	}
 
-	rows, err := d.client.Query(findAllSql)
+	customers := make([]Customer, 0)
+
+	err := d.client.Select(&customers, findAllSql)
 
 	if err != nil {
-		log.Println("Error while querying customers table" + err.Error())
+		logger.Error("Error while querying customers table" + err.Error())
 		return nil, errs.NewUnexpectedError()
 	}
-	customers := make([]Customer, 0)
-	for rows.Next() {
-		var c Customer
-		err := rows.Scan(&c.Id, &c.Name, &c.City, &c.Zipcode, &c.DateOfBirth, &c.Status)
-		if err != nil {
-			log.Println("Error while scanning customers table" + err.Error())
-			return nil, errs.NewUnexpectedError()
-		}
-		customers = append(customers, c)
-	}
 
-	return customers, nil
+	response := Customers(customers).ToDto()
+
+	return response, nil
 }
 
 func NewCustomerRepositoryDb() CustormerRepositoryDb {
-	client, err := sql.Open("mysql", "root@tcp(localhost:3306)/banking")
+
+	dbUser := os.Getenv("DB_USER")
+	dbName := os.Getenv("DB_NAME")
+	dbPort := os.Getenv("DB_PORT")
+	dataSource := fmt.Sprintf("%s@tcp(localhost:%s)/%s", dbUser, dbPort, dbName)
+
+	client, err := sqlx.Open("mysql", dataSource)
 	if err != nil {
 		panic(err)
 	}

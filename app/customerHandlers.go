@@ -1,7 +1,7 @@
 package app
 
 import (
-	"banking-app/domain"
+	"banking-app/dto"
 	"banking-app/errs"
 	"banking-app/service"
 	"encoding/json"
@@ -19,7 +19,7 @@ func (ch *CustomerHandlers) getAllCustomers(w http.ResponseWriter, r *http.Reque
 
 	status := r.URL.Query().Get("status")
 
-	var customers []domain.Customer
+	var customers []dto.CustomerResponse
 	var err *errs.AppError
 
 	if len(status) == 0 {
