@@ -32,9 +32,17 @@ func (d CustormerRepositoryDb) ById(id string) (*Customer, *errs.AppError) {
 	return &c, nil
 }
 
-func (d CustormerRepositoryDb) FindAll() ([]Customer, *errs.AppError) {
+func (d CustormerRepositoryDb) FindAll(status string) ([]Customer, *errs.AppError) {
 
-	findAllSql := "select customer_id, name , city, zipcode, date_of_birth, status from customers where 0=1"
+	findAllSql := "select customer_id, name , city, zipcode, date_of_birth, status from customers"
+
+	if status != "" {
+		if status == "active" {
+			findAllSql = findAllSql + " where status='1'"
+		} else {
+			findAllSql = findAllSql + " where status='0'"
+		}
+	}
 
 	rows, err := d.client.Query(findAllSql)
 
@@ -42,7 +50,6 @@ func (d CustormerRepositoryDb) FindAll() ([]Customer, *errs.AppError) {
 		log.Println("Error while querying customers table" + err.Error())
 		return nil, errs.NewUnexpectedError()
 	}
-
 	customers := make([]Customer, 0)
 	for rows.Next() {
 		var c Customer
