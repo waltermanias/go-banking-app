@@ -60,6 +60,14 @@ func Start() {
 	router.HandleFunc("/customers/{customer_id:[0-9]+}", ch.getById).Methods(http.MethodGet).Subrouter()
 	router.HandleFunc("/customers/{customer_id:[0-9]+}/accounts", ah.save).Methods(http.MethodPost)
 
+	// Middlewares example
+	router.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+			next.ServeHTTP(w, r)
+		})
+	})
+
 	address := os.Getenv("SERVER_ADDRESS")
 	port := os.Getenv("SERVER_PORT")
 
