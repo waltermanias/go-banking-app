@@ -5,9 +5,6 @@ import (
 	"banking-app/errs"
 	"banking-app/logger"
 	"database/sql"
-	"fmt"
-	"os"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 
@@ -66,19 +63,6 @@ func (d CustormerRepositoryDb) FindAll(status string) ([]dto.CustomerResponse, *
 	return response, nil
 }
 
-func NewCustomerRepositoryDb() CustormerRepositoryDb {
-
-	dbUser := os.Getenv("DB_USER")
-	dbName := os.Getenv("DB_NAME")
-	dbPort := os.Getenv("DB_PORT")
-	dataSource := fmt.Sprintf("%s@tcp(localhost:%s)/%s", dbUser, dbPort, dbName)
-
-	client, err := sqlx.Open("mysql", dataSource)
-	if err != nil {
-		panic(err)
-	}
-	client.SetConnMaxLifetime(time.Minute * 3)
-	client.SetMaxOpenConns(10)
-	client.SetMaxIdleConns(10)
+func NewCustomerRepositoryDb(client *sqlx.DB) CustormerRepositoryDb {
 	return CustormerRepositoryDb{client}
 }
