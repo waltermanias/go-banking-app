@@ -3,7 +3,7 @@ package dto
 type AccountRequest struct {
 	CustomerId  string  `json:"customerId"`
 	OpeningDate string  `json:"openingDate"`
-	AccountType string  `json:"accountType`
+	AccountType string  `json:"accountType"`
 	Amount      float64 `json:"amount"`
 	Status      string  `json:"status"`
 }
@@ -12,7 +12,7 @@ type AccountResponse struct {
 	AccountId   string  `json:"id"`
 	CustomerId  string  `json:"customerId"`
 	OpeningDate string  `json:"openingDate"`
-	AccountType string  `json:"accountType`
+	AccountType string  `json:"accountType"`
 	Amount      float64 `json:"amount"`
 	Status      string  `json:"status"`
 }
