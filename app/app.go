@@ -57,9 +57,8 @@ func Start() {
 	ah := AccountHandlers{service.NewAccountService(accountRepository)}
 
 	router.HandleFunc("/customers", ch.getAllCustomers).Methods(http.MethodGet)
-	router.HandleFunc("/customers/{customer_id:[0-9]+}", ch.getById).Methods(http.MethodGet)
-
-	router.HandleFunc("/accounts", ah.save).Methods(http.MethodPost)
+	router.HandleFunc("/customers/{customer_id:[0-9]+}", ch.getById).Methods(http.MethodGet).Subrouter()
+	router.HandleFunc("/customers/{customer_id:[0-9]+}/accounts", ah.save).Methods(http.MethodPost)
 
 	address := os.Getenv("SERVER_ADDRESS")
 	port := os.Getenv("SERVER_PORT")
