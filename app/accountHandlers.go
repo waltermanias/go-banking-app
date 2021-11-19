@@ -28,7 +28,7 @@ func (ch *AccountHandlers) save(w http.ResponseWriter, r *http.Request) {
 	if err2 != nil {
 		writeResponse(w, err2.Code, err2)
 	} else {
-		writeResponse(w, http.StatusOK, responseDto)
+		writeResponse(w, http.StatusCreated, responseDto)
 	}
 
 }
